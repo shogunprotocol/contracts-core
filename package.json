@@ -1,0 +1,29 @@
+{
+  "name": "hardhat-project",
+  "scripts": {
+    "deploy": "npx hardhat run scripts/deployTokensAndVault.ts",
+    "deploy:flow": "npx hardhat run scripts/deployTokensAndVault.ts --network flow",
+    "deploy:flow-testnet": "npx hardhat run scripts/deployTokensAndVault.ts --network flowTestnet",
+    "deploy:sepolia": "npx hardhat run scripts/deployTokensAndVault.ts --network sepolia",
+    "deploy:arbitrum": "npx hardhat run scripts/deployTokensAndVault.ts --network arbitrum",
+    "deploy:base": "npx hardhat run scripts/deployTokensAndVault.ts --network base",
+    "deploy:avalanche": "npx hardhat run scripts/deployTokensAndVault.ts --network avalanche",
+    "deploy:fuji": "npx hardhat run scripts/deployTokensAndVault.ts --network fuji",
+    "interact": "npx hardhat run scripts/interact-vault.ts",
+    "status": "npx hardhat run scripts/vault-status.ts",
+    "tokens": "npx hardhat run scripts/get-test-tokens.ts",
+    "mint": "npx hardhat run scripts/mint-tokens.ts --network fuji",
+    "test:fuji": "npx hardhat run scripts/test-fuji-deployment.ts --network fuji",
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.24.1"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^1.2.0",
+    "@openzeppelin/contracts": "^5.3.0",
+    "dotenv": "^16.5.0"
+  }
+}
