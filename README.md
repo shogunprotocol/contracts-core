@@ -1,6 +1,26 @@
-# AI Vaults - Modular Smart Contract System
+# CORE Vaults - Modular Smart Contract System
 
-A modular and extensible vault system built on Ethereum with ERC4626 compliance, featuring compound interest, strategy management, and role-based access control.
+A modular and extensible vault system built on Core Chain with ERC4626 compliance, featuring compound interest, strategy management, and role-based access control. Supports staking for CORE tokens, BTC (self-custodial), and stCORE (liquid staking).
+
+## 🌐 Core Chain Integration
+
+### Supported Assets
+
+- **stCORE Token**: Staked CORE tokens (liquid staking of CORE) - ✅ **ACTIVE**
+- **BTC (Self-Custodial)**: Bitcoin staking through Core Chain's hybrid consensus - 🔄 **PLANNED**
+- **Native CORE**: Direct CORE token staking - 🔄 **PLANNED**
+
+### Core Chain Components
+
+- **StakeHub**: Central hub for managing all staking operations
+- **CoreAgent**: Handles CORE token delegation and rewards
+- **Validators**: Network validators for delegation and consensus
+
+### Current Implementation
+
+- ✅ **CoreStrategy**: Complete stCORE token staking implementation
+- 🔄 **BTCStrategy**: Planned for Bitcoin staking
+- 🔄 **NativeCoreStrategy**: Planned for native CORE staking
 
 ## 🏗️ Architecture Overview
 
@@ -39,23 +59,25 @@ The system has been refactored into a modular architecture for better maintainab
 
 - **`Vault.sol`** - Complete vault implementation
 
-  - ERC4626 compliance
+  - ERC4626 compliance for CORE tokens
   - Yield accrual and compounding
-  - Strategy integration
+  - Strategy integration for Core Chain protocols
   - Fee management
   - Pausable functionality
 
 - **`VaultFactory.sol`** - Factory for vault creation
 
-  - Standardized vault deployment
+  - Standardized vault deployment on Core Chain
   - Fee collection for vault creation
   - Default parameter management
 
-- **`strategies.sol`** - Generic strategy implementation
-  - Protocol-agnostic strategy execution via function selectors
-  - Automatic reward token collection and forwarding
+- **`strategies/`** - Core Chain strategy implementations
+  - **`CoreStrategy.sol`** - CORE token staking strategy
+  - **`strategies.sol`** - Generic strategy base implementation
+  - Core Chain StakeHub integration
+  - Validator delegation support
+  - Automatic reward collection and forwarding
   - Emergency exit functionality
-  - Pausable strategy operations
 
 ## 🚀 Key Features
 
@@ -75,10 +97,11 @@ The system has been refactored into a modular architecture for better maintainab
 
 ### 🎯 Strategy Management
 
-- **Generic Implementation**: Works with any protocol via function selectors
-- **Multiple Strategies**: Support for multiple concurrent strategies
-- **Reward Handling**: Automatic forwarding of reward tokens
-- **Emergency Exit**: Quick withdrawal from strategies
+- **Core Chain Integration**: Native integration with Core Chain's StakeHub
+- **CORE Token Staking**: Direct delegation to Core Chain validators
+- **Multiple Asset Support**: Ready for CORE, BTC, and stCORE strategies
+- **Reward Handling**: Automatic collection of staking rewards
+- **Emergency Exit**: Quick withdrawal from validators and protocols
 
 ### 💸 Fee System
 
@@ -100,10 +123,13 @@ contracts/
 │   ├── Strategies.sol (157 lines)
 │   ├── IVaultFactory.sol (193 lines)
 │   └── Vault.sol (142 lines)
-├── strategies/              # Strategy implementations
-│   └── strategies.sol (370 lines)
+├── strategies/              # Core Chain strategy implementations
+│   ├── CoreStrategy.sol (292 lines) # CORE token staking strategy
+│   └── strategies.sol (351 lines)   # Generic strategy base
 ├── mocks/                   # Mock contracts for testing
-│   ├── MockERC20.sol (24 lines)
+│   ├── MockERC20.sol (25 lines)     # Mock CORE token
+│   ├── MockStakeHub.sol (153 lines) # Mock Core Chain StakeHub
+│   ├── MockCoreAgent.sol (248 lines) # Mock Core Agent
 │   ├── MockProtocol.sol (94 lines)
 │   ├── MockSushiSwap.sol (269 lines)
 │   ├── MockToken.sol (40 lines)
@@ -119,32 +145,35 @@ contracts/
 
 The modular architecture is thoroughly tested with comprehensive test suites:
 
-- **184 passing tests** covering all functionality
-- **Unit tests** for each module
-- **Integration tests** for complete workflows
+- **25+ passing tests** for CoreStrategy covering all functionality
+- **184 passing tests** for base vault system
+- **Unit tests** for each module and Core Chain integration
+- **Integration tests** for complete staking workflows
+- **Mock Core Chain contracts** for realistic testing
 - **Edge case testing** for security and robustness
-- **Gas optimization tests** for efficiency
 
 ### Test Categories
 
 - Constructor and role validation
-- Strategy management operations
-- ERC4626 compliance
+- Core Chain staking operations
+- CORE token delegation to validators
+- Staking reward collection and distribution
+- ERC4626 compliance for CORE tokens
 - Yield calculation accuracy
 - Fee collection and management
 - Access control security
-- Emergency scenarios
+- Emergency exit scenarios
 
 ## 🔧 Usage
 
 ### Deploying a Vault
 
 ```solidity
-// Deploy vault with custom parameters
+// Deploy CORE vault with custom parameters
 Vault vault = new Vault(
-    underlyingToken,    // ERC20 token address
-    "Vault Token",      // Token name
-    "vUNDER",          // Token symbol
+    coreToken,         // CORE token address
+    "Vault CORE",      // Token name
+    "vCORE",          // Token symbol
     manager,           // Manager address
     agent,             // Agent address
     100,               // 1% withdrawal fee (100 basis points)
@@ -165,11 +194,11 @@ VaultFactory factory = new VaultFactory(
     treasury
 );
 
-// Create vault through factory
+// Create CORE vault through factory
 factory.createVault(
-    underlyingToken,
-    "Vault Token",
-    "vUNDER",
+    coreToken,
+    "Vault CORE",
+    "vCORE",
     customManager,     // Optional: use custom manager
     customAgent,       // Optional: use custom agent
     withdrawalFee,
@@ -178,20 +207,28 @@ factory.createVault(
 );
 ```
 
-### Strategy Integration
+### Core Chain Strategy Integration
 
 ```solidity
-// Add strategy to vault
-vault.addStrategy(strategyAddress);
+// Deploy CoreStrategy
+CoreStrategy coreStrategy = new CoreStrategy(
+    coreToken,          // CORE token address
+    stakeHub,           // Core Chain StakeHub address
+    coreAgent,          // Core Chain Agent address
+    validatorAddress    // Default validator to delegate to
+);
 
-// Execute strategy
-vault.depositToStrategy(strategyAddress, amount, data);
+// Add CORE staking strategy to vault
+vault.addStrategy(address(coreStrategy));
 
-// Harvest rewards
-vault.harvestStrategy(strategyAddress, data);
+// Execute CORE staking (delegate to validator)
+vault.depositToStrategy(address(coreStrategy), amount, validatorData);
 
-// Emergency exit
-vault.emergencyExitStrategy(strategyAddress, data);
+// Harvest staking rewards
+vault.harvestStrategy(address(coreStrategy), "0x");
+
+// Emergency exit (undelegate from validator)
+vault.emergencyExitStrategy(address(coreStrategy), validatorData);
 ```
 
 ## 🔒 Security Features
@@ -229,17 +266,34 @@ npx hardhat compile
 npx hardhat test
 ```
 
-### Scripts
+### Core Chain Scripts
 
 ```bash
-# Deploy to testnet
-npm run deploy:fuji
+# Complete System Deployment
+npm run deploy:vault-system:testnet  # Deploy complete vault system on testnet
+npm run deploy:vault-system:mainnet  # Deploy complete vault system on mainnet
+npm run deploy:with-factory          # Deploy system with VaultFactory
 
-# Run tests
-npm run test
+# Individual Component Deployment
+npm run deploy:core-testnet          # Deploy CoreStrategy only
+npm run deploy:core-mainnet          # Deploy CoreStrategy only
 
-# Compile contracts
-npm run compile
+# stCORE Token Management
+npm run tokens:core-testnet          # Get stCORE tokens on testnet
+npm run deploy:mock-stcore           # Deploy mock stCORE token for testing
+
+# Strategy Interaction
+npm run interact:core-testnet        # Interact with strategy on testnet
+npm run interact:core-mainnet        # Interact with strategy on mainnet
+
+# Monitoring & Status
+npm run status:core-testnet          # Check vault and strategy status
+npm run status:core-mainnet          # Check status on mainnet
+
+# Development
+npm run compile                      # Compile contracts
+npm run test                         # Run all tests
+npm run test:core                    # Run CoreStrategy tests only
 ```
 
 ## 📈 Performance
@@ -263,10 +317,87 @@ MIT License - see LICENSE file for details
 
 ## 🔗 Links
 
+### Core Chain Resources
+
+- [Core Chain Official Website](https://coredao.org/)
+- [Core Chain Documentation](https://docs.coredao.org/)
+- [Core Chain StakeHub](https://docs.coredao.org/developer/develop-on-core/building-on-core/staking)
+- [Core Chain Testnet Faucet](https://scan.test.btcs.network/faucet)
+
+### Development Resources
+
 - [OpenZeppelin Contracts](https://openzeppelin.com/contracts/)
 - [ERC4626 Standard](https://eips.ethereum.org/EIPS/eip-4626)
 - [Hardhat Framework](https://hardhat.org/)
-# contracts-core
-# contracts-core
-# contracts-core
-# contracts-core
+
+## 🏗️ Quick Start for Core Chain
+
+### Complete Development Flow
+
+1. **Setup Environment**
+
+```bash
+# Clone and install
+git clone <repository>
+cd contracts-core
+npm install
+
+# Setup environment variables (create .env file)
+# Add: PRIV_KEY, CORE_TESTNET_VALIDATOR, etc.
+```
+
+2. **Development & Testing**
+
+```bash
+# Run tests first
+npm run test:core
+
+# Deploy mock stCORE token (testnet only)
+npm run deploy:mock-stcore
+
+# Get test stCORE tokens
+npm run tokens:core-testnet
+```
+
+3. **Deploy Complete System**
+
+```bash
+# Deploy complete vault system (recommended)
+npm run deploy:vault-system:testnet
+
+# Or deploy individual components
+npm run deploy:core-testnet        # CoreStrategy only
+```
+
+4. **Interact & Monitor**
+
+```bash
+# Check status
+npm run status:core-testnet
+
+# Interact with strategy (stake, harvest, etc.)
+npm run interact:core-testnet
+```
+
+### Production Flow
+
+```bash
+# For Core Mainnet
+npm run deploy:vault-system:mainnet  # Deploy complete system
+npm run interact:core-mainnet        # Interact with strategy
+npm run status:core-mainnet          # Monitor status
+```
+
+## 📊 Core Chain Networks
+
+### Mainnet
+
+- **Chain ID**: 1116
+- **RPC**: https://rpc.coredao.org/
+- **Explorer**: https://scan.coredao.org/
+
+### Testnet
+
+- **Chain ID**: 1114
+- **RPC**: https://rpc.test2.btcs.network
+- **Explorer**: https://scan.test2.btcs.network/
