@@ -7,17 +7,9 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.28",
+        version: "0.8.26",
         settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-      },
-      {
-        version: "0.8.13",
-        settings: {
+          evmVersion: "shanghai",
           optimizer: {
             enabled: true,
             runs: 200,
@@ -30,39 +22,49 @@ const config: HardhatUserConfig = {
     hardhat: {
       chainId: 31337,
     },
-    localhost: {
-      url: "http://127.0.0.1:8545",
-      chainId: 31337,
-    },
-    arbitrum: {
-      url: process.env.ARBITRUM_RPC_URL || "",
+    core_testnet2: {
+      url: "https://rpc.test2.btcs.network",
       accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 42161,
+      chainId: 1114,
     },
-    base: {
-      url: process.env.BASE_RPC_URL || "",
-      accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 8453,
-    },
-    avalanche: {
-      url: process.env.AVALANCHE_RPC_URL || "",
-      accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 43114,
-    },
-    fuji: {
-      url: process.env.FUJI_RPC_URL || "",
-      accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 43113,
-    },
-    sepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "",
-      accounts: process.env.PRIV_KEY ? [process.env.PRIV_KEY] : [],
-      chainId: 11155111,
-    },
+    ...(process.env.PRIV_KEY && {
+      core_mainnet: {
+        url: "https://rpc.coredao.org/",
+        accounts: [process.env.PRIV_KEY],
+        chainId: 1116,
+      },
+    }),
   },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
-  },
+  ...((process.env.CORE_TEST2_SCAN_KEY || process.env.CORE_MAIN_SCAN_KEY) && {
+    etherscan: {
+      apiKey: {
+        ...(process.env.CORE_TEST2_SCAN_KEY && {
+          core_testnet2: process.env.CORE_TEST2_SCAN_KEY,
+        }),
+        ...(process.env.CORE_MAIN_SCAN_KEY && {
+          core_mainnet: process.env.CORE_MAIN_SCAN_KEY,
+        }),
+      },
+      customChains: [
+        {
+          network: "core_testnet2",
+          chainId: 1114,
+          urls: {
+            apiURL: "https://api.test2.btcs.network/api",
+            browserURL: "https://scan.test2.btcs.network/",
+          },
+        },
+        {
+          network: "core_mainnet",
+          chainId: 1116,
+          urls: {
+            apiURL: "https://openapi.coredao.org/api",
+            browserURL: "https://scan.coredao.org/",
+          },
+        },
+      ],
+    },
+  }),
   ignition: {
     requiredConfirmations: 1,
   },
