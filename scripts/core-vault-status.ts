@@ -8,14 +8,7 @@ dotenv.config();
 const CORE_CONTRACTS = {
   VAULT:
     process.env.CORE_TESTNET2_VAULT || process.env.CORE_MAINNET_VAULT || "",
-  CORE_TOKEN:
-    process.env.CORE_TESTNET2_CORE_TOKEN ||
-    process.env.CORE_MAINNET_CORE_TOKEN ||
-    "",
-  CORE_STRATEGY:
-    process.env.CORE_TESTNET2_CORE_STRATEGY ||
-    process.env.CORE_MAINNET_CORE_STRATEGY ||
-    "",
+  CORE_TOKEN: "0xb3a8f0f0da9ffc65318aa39e55079796093029ad",
 };
 
 async function main() {

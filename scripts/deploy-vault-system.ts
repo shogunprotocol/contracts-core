@@ -12,23 +12,23 @@ const CORE_CHAIN_CONFIG = {
     stakeHub: "0x0000000000000000000000000000000000001000", // Core Chain StakeHub
     coreAgent: "0x0000000000000000000000000000000000001001", // Core Chain Agent
     stCoreToken: "0xb3a8f0f0da9ffc65318aa39e55079796093029ad", // Real stCORE token
-    defaultValidator: process.env.CORE_MAINNET_VALIDATOR || "",
+    defaultValidator: "0x7f461f8a1c35eDEcD6816e76Eb2E84eb661751eE", //Dao validator 2
   },
-  core_testnet2: {
-    chainId: 1114,
-    name: "Core Testnet",
-    stakeHub: "0x0000000000000000000000000000000000001000", // Core Chain StakeHub
-    coreAgent: "0x0000000000000000000000000000000000001001", // Core Chain Agent
-    stCoreToken: process.env.CORE_TESTNET2_STCORE_TOKEN || "", // Mock stCORE token
-    defaultValidator: process.env.CORE_TESTNET_VALIDATOR || "",
-  },
+  // core_testnet2: {
+  //   chainId: 1114,
+  //   name: "Core Testnet",
+  //   stakeHub: "0x0000000000000000000000000000000000001000", // Core Chain StakeHub
+  //   coreAgent: "0x0000000000000000000000000000000000001001", // Core Chain Agent
+  //   stCoreToken: process.env.CORE_TESTNET2_STCORE_TOKEN || "", // Mock stCORE token
+  //   defaultValidator: process.env.CORE_TESTNET_VALIDATOR || "",
+  // },
 };
 
 // Deployment configuration
 const DEPLOYMENT_CONFIG = {
   vault: {
-    name: "stCORE Vault",
-    symbol: "vstCORE",
+    name: "IWBTC Vault",
+    symbol: "IWBTC",
     withdrawalFee: 100, // 1% (100 basis points)
     yieldRate: 800, // 8% annual yield (800 basis points)
   },
@@ -76,10 +76,10 @@ async function main() {
   // Handle stCORE token (deploy mock for testnet if not set)
   let stCoreTokenAddress = config.stCoreToken;
 
-  if (!stCoreTokenAddress && currentNetwork === "core_testnet2") {
-    console.log("🏗️ Deploying Mock stCORE Token for testnet...");
-    stCoreTokenAddress = await deployMockStCoreToken(deployer);
-  }
+  // if (!stCoreTokenAddress && currentNetwork === "core_testnet2") {
+  //   console.log("🏗️ Deploying Mock stCORE Token for testnet...");
+  //   stCoreTokenAddress = await deployMockStCoreToken(deployer);
+  // }
 
   if (!stCoreTokenAddress) {
     console.log("❌ stCORE token address not configured");
@@ -181,25 +181,26 @@ async function main() {
       `  Total Supply: ${ethers.formatEther(vaultTotalSupply)} ${vaultSymbol}`
     );
 
-    // Step 5: Deploy VaultFactory (optional)
-    if (process.env.DEPLOY_VAULT_FACTORY === "true") {
-      console.log("\n🏭 Step 5: Deploying VaultFactory...");
+    // // Step 5: Deploy VaultFactory (optional)
+    // if (process.env.DEPLOY_VAULT_FACTORY === "true") {
+    //   console.log("\n🏭 Step 5: Deploying VaultFactory...");
 
-      const VaultFactoryContract = await ethers.getContractFactory(
-        "VaultFactory"
-      );
-      const vaultFactory = await VaultFactoryContract.deploy(
-        deployer.address, // default manager
-        deployer.address, // default agent
-        100, // default withdrawal fee (1%)
-        ethers.parseEther("0.01"), // creation fee (0.01 CORE)
-        deployer.address // treasury
-      );
+    //   const VaultFactoryContract = await ethers.getContractFactory(
+    //     "VaultFactory"
+    //   );
+    //   const vaultFactory = await VaultFactoryContract.deploy(
+    //     deployer.address, // default manager
+    //     deployer.address, // default agent
+    //     100, // default withdrawal fee (1%)
+    //     ethers.parseEther("0.01"), // creation fee (0.01 CORE)
+    //     deployer.address,
+    //     deployer.address // treasury
+    //   );
 
-      await vaultFactory.waitForDeployment();
-      const factoryAddress = await vaultFactory.getAddress();
-      console.log(`✅ VaultFactory deployed: ${factoryAddress}`);
-    }
+    //   await vaultFactory.waitForDeployment();
+    //   const factoryAddress = await vaultFactory.getAddress();
+    //   console.log(`✅ VaultFactory deployed: ${factoryAddress}`);
+    // }
 
     // Final summary
     console.log("\n🎉 Deployment Summary:");
